@@ -2,23 +2,6 @@ import React, { Component } from 'react'
 import Square from "./Square"
 
 export default class Board extends Component {
-    selectSquare = (id) => {
-        let array = this.props.squareList;
-        let historyArray = this.props.history;
-
-        if (array[id] !== "") {
-            alert("click other square");
-            return;
-        }
-        array[id] = this.props.nextPlayer ? "X" : "O";
-
-        historyArray.push({ squareList: array, nextPlayer: !this.props.nextPlayer })
-        this.props.setParentsState({
-            squareList: array,
-            nextPlayer: !this.props.nextPlayer,
-            history: historyArray,
-        });
-    };
 
     calculateWinner = (squares) => {
         const lines = [
@@ -39,15 +22,55 @@ export default class Board extends Component {
         }
         return null;
     }
-    render() {
+    
+
+    selectSquare = (id) => {
+        let array = this.props.squareList;
+        let historyArray = this.props.history;
+
+        if (array[id] !== "") {
+            alert("click other square");
+            return;
+        }
+        array[id] = this.props.nextPlayer ? "X" : "O";
+
         const winner = this.calculateWinner(this.props.squareList);
         let gameOver = false;
-        if (!winner && this.props.squareList.every((item) => item !== '')) { gameOver = true }
+        if (!winner && this.props.squareList.every((item) => item !== '')) { 
+            gameOver = true 
+            this.resetGame();
+        } else if (winner !== null){
+            this.props.postData()
+            this.props.getData()
+            this.resetGame()
+            
+        } else {
+            historyArray.push({ squareList: array, nextPlayer: !this.props.nextPlayer })
+            this.props.setParentsState({
+            squareList: array,
+            nextPlayer: !this.props.nextPlayer,
+            history: historyArray,
+            winner,
+            gameOver,
+        });
+    }};
 
+   resetGame = ()=> {
+    this.props.setParentsState({
+        squareList: ['', '', '', '', '', '', '', '', ''],
+        history: [],
+        winner:"",
+        gameOver:false,
+    });
+};
+
+
+    render() {
+        
         let status;
-        if (winner) {
-            status = 'Winner: ' + winner;
-        } else if (gameOver) {
+        if (this.props.winner) {
+            status = 'Winner: ' + this.props.winner;
+        } else if (this.props.gameOver) {
             status = "Game Over"
         }
         else {
@@ -55,6 +78,7 @@ export default class Board extends Component {
         }
         return (
             <div>
+               
                 <h3>{status}</h3>
 
                 <div style={{ display: "flex" }}>
